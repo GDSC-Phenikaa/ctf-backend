@@ -25,3 +25,7 @@ func JwtSecret() string {
 func SessionSecret() string {
 	return os.Getenv("SESSION_SECRET")
 }
+
+func IsDebug() bool {
+	return os.Getenv("DEBUG") == "true"
+}

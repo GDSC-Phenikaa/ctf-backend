@@ -12,8 +12,8 @@ definitions:
 host: localhost:3333
 info:
   contact: {}
-  description: Twilight CTF API
-  title: Twilight CTF API
+  description: GDSC CTF API
+  title: GDSC CTF API
   version: "1.0"
 paths:
   /user/login:

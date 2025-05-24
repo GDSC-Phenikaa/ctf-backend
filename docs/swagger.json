@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Twilight CTF API",
-        "title": "Twilight CTF API",
+        "description": "GDSC CTF API",
+        "title": "GDSC CTF API",
         "contact": {},
         "version": "1.0"
     },
