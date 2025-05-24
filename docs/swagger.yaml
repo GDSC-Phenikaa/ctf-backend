@@ -1,0 +1,100 @@
+basePath: /
+definitions:
+  models.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:3333
+info:
+  contact: {}
+  description: Twilight CTF API
+  title: Twilight CTF API
+  version: "1.0"
+paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user by email
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          type: object
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Logged in
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Invalid credentials
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - user
+  /user/profile:
+    get:
+      description: Gets the current user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get Profile
+      tags:
+      - user
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Registered
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "409":
+          description: Email already exists
+          schema:
+            type: string
+      summary: Register
+      tags:
+      - user
+swagger: "2.0"
