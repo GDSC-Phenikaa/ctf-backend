@@ -2,8 +2,8 @@ package sessions
 
 import (
 	"net/http"
-	"os"
 
+	"github.com/GDSC-Phenikaa/twilight-ctf/env"
 	"github.com/gorilla/sessions"
 )
 
@@ -15,7 +15,7 @@ func InitSessionStore() {
 }
 
 func getSessionSecret() string {
-	secret := os.Getenv("SESSION_SECRET")
+	secret := env.SessionSecret()
 	if secret == "" {
 		panic("SESSION_SECRET environment variable is not set")
 	}
