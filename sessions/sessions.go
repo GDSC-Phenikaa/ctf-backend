@@ -3,7 +3,7 @@ package sessions
 import (
 	"net/http"
 
-	"github.com/GDSC-Phenikaa/twilight-ctf/env"
+	"github.com/GDSC-Phenikaa/ctf-backend/env"
 	"github.com/gorilla/sessions"
 )
 
