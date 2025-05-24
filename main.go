@@ -8,10 +8,10 @@ package main
 import (
 	"net/http"
 
-	"github.com/GDSC-Phenikaa/twilight-ctf/db"
-	_ "github.com/GDSC-Phenikaa/twilight-ctf/docs" // swagger docs
-	"github.com/GDSC-Phenikaa/twilight-ctf/routes"
-	"github.com/GDSC-Phenikaa/twilight-ctf/sessions"
+	"github.com/GDSC-Phenikaa/ctf-backend/db"
+	_ "github.com/GDSC-Phenikaa/ctf-backend/docs" // swagger docs
+	"github.com/GDSC-Phenikaa/ctf-backend/routes"
+	"github.com/GDSC-Phenikaa/ctf-backend/sessions"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"

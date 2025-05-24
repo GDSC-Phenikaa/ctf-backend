@@ -1,4 +1,4 @@
-module github.com/GDSC-Phenikaa/twilight-ctf
+module github.com/GDSC-Phenikaa/ctf-backend
 
 go 1.23.6
 
