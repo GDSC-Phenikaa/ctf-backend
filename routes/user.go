@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/GDSC-Phenikaa/twilight-ctf/models"
+	"github.com/GDSC-Phenikaa/twilight-ctf/sessions"
 	"github.com/go-chi/chi/v5"
-	"github.com/twilightty/twilight-ctf/models"
-	"github.com/twilightty/twilight-ctf/sessions"
 	"gorm.io/gorm"
 )
 

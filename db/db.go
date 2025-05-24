@@ -3,7 +3,7 @@ package db
 import (
 	"os"
 
-	"github.com/twilightty/twilight-ctf/models"
+	"github.com/GDSC-Phenikaa/twilight-ctf/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

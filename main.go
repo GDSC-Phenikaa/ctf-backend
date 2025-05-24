@@ -8,14 +8,14 @@ package main
 import (
 	"net/http"
 
+	"github.com/GDSC-Phenikaa/twilight-ctf/db"
+	_ "github.com/GDSC-Phenikaa/twilight-ctf/docs" // swagger docs
+	"github.com/GDSC-Phenikaa/twilight-ctf/routes"
+	"github.com/GDSC-Phenikaa/twilight-ctf/sessions"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"github.com/twilightty/twilight-ctf/db"
-	_ "github.com/twilightty/twilight-ctf/docs" // swagger docs
-	"github.com/twilightty/twilight-ctf/routes"
-	"github.com/twilightty/twilight-ctf/sessions"
 	"gorm.io/gorm"
 )
 
