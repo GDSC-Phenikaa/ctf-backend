@@ -14,7 +14,11 @@ import (
 	_ "github.com/GDSC-Phenikaa/ctf-backend/docs" // swagger docs
 	"github.com/GDSC-Phenikaa/ctf-backend/env"
 	"github.com/GDSC-Phenikaa/ctf-backend/helpers"
+	"github.com/GDSC-Phenikaa/ctf-backend/middlewares"
+	"github.com/GDSC-Phenikaa/ctf-backend/models"
 	"github.com/GDSC-Phenikaa/ctf-backend/routes"
+	"github.com/GDSC-Phenikaa/ctf-backend/routes/challenges/admin"
+	"github.com/GDSC-Phenikaa/ctf-backend/routes/challenges/user"
 	"github.com/GDSC-Phenikaa/ctf-backend/sessions"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -31,7 +35,11 @@ func initialize() (*gorm.DB, error) {
 	}
 
 	// Ensure the database is migrated
-	if err := database.AutoMigrate(); err != nil {
+	if err := database.AutoMigrate(
+		&models.User{},
+		&models.Challanges{},
+		&models.Solves{},
+	); err != nil {
 		panic(err)
 	}
 
@@ -61,6 +69,9 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(helpers.CORSMiddleware)
+
+	r.Options("/*", helpers.CORSOptionsHandler)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world"))
@@ -72,7 +83,10 @@ func main() {
 	}
 
 	r.Mount("/user", routes.UserRoutes(database))
-
+	r.With(middlewares.AuthMiddleware).Get("/profile", routes.ProfileHandler(database))
+	r.Mount("/admin", admin.AdminRoutes(database))
+	r.Mount("/user/challenges", user.UserChallengesRoutes(database))
+	r.Mount("/secret", routes.SecretRoutes())
 	helpers.Information("Database type: %s", env.DbType())
 	helpers.Information("Database name: %s", env.DbName())
 	if env.DbType() == "postgres" {

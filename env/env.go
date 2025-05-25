@@ -29,3 +29,11 @@ func SessionSecret() string {
 func IsDebug() bool {
 	return os.Getenv("DEBUG") == "true"
 }
+
+func SecretFlag() string {
+	return os.Getenv("SECRET_FLAG")
+}
+
+func ProblemRoot() string {
+	return os.Getenv("PROBLEM_ROOT")
+}
