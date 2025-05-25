@@ -1,16 +1,24 @@
-// @title           Twilight CTF API
+// @title           GDSC CTF API
 // @version         1.0
-// @description     Twilight CTF API
+// @description     GDSC CTF API
 // @host            localhost:3333
 // @BasePath        /
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/GDSC-Phenikaa/ctf-backend/db"
 	_ "github.com/GDSC-Phenikaa/ctf-backend/docs" // swagger docs
+	"github.com/GDSC-Phenikaa/ctf-backend/env"
+	"github.com/GDSC-Phenikaa/ctf-backend/helpers"
+	"github.com/GDSC-Phenikaa/ctf-backend/middlewares"
+	"github.com/GDSC-Phenikaa/ctf-backend/models"
 	"github.com/GDSC-Phenikaa/ctf-backend/routes"
+	"github.com/GDSC-Phenikaa/ctf-backend/routes/challenges/admin"
+	"github.com/GDSC-Phenikaa/ctf-backend/routes/challenges/user"
 	"github.com/GDSC-Phenikaa/ctf-backend/sessions"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -27,7 +35,11 @@ func initialize() (*gorm.DB, error) {
 	}
 
 	// Ensure the database is migrated
-	if err := database.AutoMigrate(); err != nil {
+	if err := database.AutoMigrate(
+		&models.User{},
+		&models.Challanges{},
+		&models.Solves{},
+	); err != nil {
 		panic(err)
 	}
 
@@ -35,7 +47,18 @@ func initialize() (*gorm.DB, error) {
 }
 
 func main() {
+	helpers.ParseFlags()
+
 	_ = godotenv.Load()
+	if _, err := os.Stat(".env"); err != nil {
+		helpers.Error("Failed to load .env file: %v", err)
+		os.Exit(1)
+	} else {
+		helpers.Information("Loaded environment variables from .env file")
+	}
+
+	helpers.Information("Starting GDSC CTF API on port %s", env.Port())
+
 	sessions.InitSessionStore()
 	database, err := initialize()
 	if err != nil {
@@ -46,14 +69,34 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(helpers.CORSMiddleware)
+
+	r.Options("/*", helpers.CORSOptionsHandler)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world"))
 	})
 
-	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	if env.IsDebug() {
+		helpers.Warning("Debug mode is enabled. Swagger documentation is available.")
+		r.Get("/swagger/*", httpSwagger.WrapHandler)
+	}
 
 	r.Mount("/user", routes.UserRoutes(database))
+	r.With(middlewares.AuthMiddleware).Get("/profile", routes.ProfileHandler(database))
+	r.Mount("/admin", admin.AdminRoutes(database))
+	r.Mount("/user/challenges", user.UserChallengesRoutes(database))
+	r.Mount("/secret", routes.SecretRoutes())
+	helpers.Information("Database type: %s", env.DbType())
+	helpers.Information("Database name: %s", env.DbName())
+	if env.DbType() == "postgres" {
+		helpers.Information("Database DSN: %s", env.DbDsn())
+	}
 
-	http.ListenAndServe(":3333", r)
+	helpers.Success("API is running on http://localhost:%s", env.Port())
+	if env.IsDebug() {
+		helpers.Success("Swagger documentation is available at http://localhost:%s/swagger/index.html", env.Port())
+	}
+
+	http.ListenAndServe(fmt.Sprintf(":%s", env.Port()), r)
 }

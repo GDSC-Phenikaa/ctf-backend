@@ -8,12 +8,40 @@ definitions:
         type: integer
       name:
         type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  routes.LoginStruct:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: securepassword
+        type: string
+    type: object
+  routes.RegisterStruct:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: securepassword
+        type: string
+      username:
+        example: johndoe
+        type: string
     type: object
 host: localhost:3333
 info:
   contact: {}
-  description: Twilight CTF API
-  title: Twilight CTF API
+  description: GDSC CTF API
+  title: GDSC CTF API
   version: "1.0"
 paths:
   /user/login:
@@ -27,7 +55,7 @@ paths:
         name: credentials
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/routes.LoginStruct'
       produces:
       - text/plain
       responses:
@@ -78,7 +106,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/routes.RegisterStruct'
       produces:
       - text/plain
       responses:

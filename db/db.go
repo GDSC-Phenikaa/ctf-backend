@@ -1,8 +1,7 @@
 package db
 
 import (
-	"os"
-
+	"github.com/GDSC-Phenikaa/ctf-backend/env"
 	"github.com/GDSC-Phenikaa/ctf-backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -10,10 +9,10 @@ import (
 )
 
 func Connect() (*gorm.DB, error) {
-	db_type := os.Getenv("DB_TYPE")
+	db_type := env.DbType()
 
 	if db_type == "sqlite" {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("DB_NAME")), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(env.DbName()), &gorm.Config{})
 		if err != nil {
 			return nil, err
 		}
@@ -27,7 +26,7 @@ func Connect() (*gorm.DB, error) {
 	}
 
 	if db_type == "postgres" {
-		dsn := os.Getenv("DB_DSN")
+		dsn := env.DbDsn()
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
 			return nil, err

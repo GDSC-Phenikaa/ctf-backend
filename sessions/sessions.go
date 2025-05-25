@@ -2,8 +2,10 @@ package sessions
 
 import (
 	"net/http"
-	"os"
+	"time"
 
+	"github.com/GDSC-Phenikaa/ctf-backend/env"
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/sessions"
 )
 
@@ -15,7 +17,7 @@ func InitSessionStore() {
 }
 
 func getSessionSecret() string {
-	secret := os.Getenv("SESSION_SECRET")
+	secret := env.SessionSecret()
 	if secret == "" {
 		panic("SESSION_SECRET environment variable is not set")
 	}
@@ -51,4 +53,14 @@ func DestroySession(w http.ResponseWriter, r *http.Request) error {
 	}
 	session.Options.MaxAge = -1
 	return session.Save(r, w)
+}
+
+func GenerateJWT(userID uint) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"iat":     time.Now().Unix(),                     // issued at
+		"exp":     time.Now().Add(24 * time.Hour).Unix(), // token expires in 24 hours
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(env.JwtSecret()))
 }
