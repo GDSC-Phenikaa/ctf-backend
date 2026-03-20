@@ -19,6 +19,8 @@ import (
 	"github.com/GDSC-Phenikaa/ctf-backend/routes"
 	"github.com/GDSC-Phenikaa/ctf-backend/routes/challenges/admin"
 	"github.com/GDSC-Phenikaa/ctf-backend/routes/challenges/user"
+	lmsadmin "github.com/GDSC-Phenikaa/ctf-backend/routes/lms/admin"
+	lmsuser "github.com/GDSC-Phenikaa/ctf-backend/routes/lms/user"
 	"github.com/GDSC-Phenikaa/ctf-backend/sessions"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -39,6 +41,10 @@ func initialize() (*gorm.DB, error) {
 		&models.User{},
 		&models.Challanges{},
 		&models.Solves{},
+		&models.Module{},
+		&models.Lesson{},
+		&models.Question{},
+		&models.QuestionSolve{},
 	); err != nil {
 		panic(err)
 	}
@@ -85,7 +91,9 @@ func main() {
 	r.Mount("/user", routes.UserRoutes(database))
 	r.With(middlewares.AuthMiddleware).Get("/profile", routes.ProfileHandler(database))
 	r.Mount("/admin", admin.AdminRoutes(database))
+	r.Mount("/admin/lms", lmsadmin.AdminLMSRoutes(database))
 	r.Mount("/user/challenges", user.UserChallengesRoutes(database))
+	r.Mount("/user/lms", lmsuser.UserLMSRoutes(database))
 	r.Mount("/secret", routes.SecretRoutes())
 	helpers.Information("Database type: %s", env.DbType())
 	helpers.Information("Database name: %s", env.DbName())
