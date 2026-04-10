@@ -176,3 +176,33 @@ Base paths:
 - `[PUT] /admin/lms/<resource>/{id}` - Update an instance (JSON payload)
 - `[DELETE] /admin/lms/<resource>/{id}` - Soft-delete an instance
 
+---
+
+## 5. Scoreboards 🏆
+
+These endpoints aggregate all correctly solved tasks across the user base and return an ordered array of user scores, automatically filtering out admin accounts.
+
+### Fetch CTF Scoreboard
+- **URL**: `/scoreboard/ctf`
+- **Method**: `GET`
+- **Access**: Public
+- **Response**: `200 OK`
+  ```json
+  {
+      "status": "success",
+      "scoreboard": [
+          {
+              "user_id": 2,
+              "username": "hacker123",
+              "name": "Jane Doe",
+              "score": 1400
+          }
+      ]
+  }
+  ```
+
+### Fetch LMS Scoreboard
+- **URL**: `/scoreboard/lms`
+- **Method**: `GET`
+- **Access**: Public
+- **Response**: `200 OK` (Same schema as above, calculating from the theoretical LMS Question solves instead)

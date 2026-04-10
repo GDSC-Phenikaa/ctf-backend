@@ -92,6 +92,7 @@ func main() {
 	r.With(middlewares.AuthMiddleware).Get("/profile", routes.ProfileHandler(database))
 	r.Mount("/admin", admin.AdminRoutes(database))
 	r.Mount("/admin/lms", lmsadmin.AdminLMSRoutes(database))
+	r.Mount("/scoreboard", routes.ScoreboardRoutes(database))
 	r.Mount("/user/challenges", user.UserChallengesRoutes(database))
 	r.Mount("/user/lms", lmsuser.UserLMSRoutes(database))
 	r.Mount("/secret", routes.SecretRoutes())
