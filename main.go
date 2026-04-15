@@ -39,12 +39,15 @@ func initialize() (*gorm.DB, error) {
 	// Ensure the database is migrated
 	if err := database.AutoMigrate(
 		&models.User{},
+		&models.Note{},
 		&models.Challanges{},
 		&models.Solves{},
 		&models.Module{},
 		&models.Lesson{},
+		&models.VideoSegment{},
 		&models.Question{},
 		&models.QuestionSolve{},
+		&models.Workspace{},
 	); err != nil {
 		panic(err)
 	}
@@ -96,6 +99,12 @@ func main() {
 	r.Mount("/user/challenges", user.UserChallengesRoutes(database))
 	r.Mount("/user/lms", lmsuser.UserLMSRoutes(database))
 	r.Mount("/secret", routes.SecretRoutes())
+	r.Mount("/certificate", routes.CertificateRoutes())
+	r.Mount("/workspace", routes.WorkspaceRoutes(database))
+
+	// Bridge for VNC WebSockets that expect to be at the root.
+	// Needs AuthMiddleware to read the workspace_token cookie.
+	r.With(middlewares.AuthMiddleware).HandleFunc("/websockify*", routes.WorkspaceProxy(database))
 	helpers.Information("Database type: %s", env.DbType())
 	helpers.Information("Database name: %s", env.DbName())
 	if env.DbType() == "postgres" {

@@ -4,8 +4,10 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/GDSC-Phenikaa/ctf-backend/env"
+	"github.com/GDSC-Phenikaa/ctf-backend/helpers"
 	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
 )
@@ -16,22 +18,70 @@ const userIDKey contextKey = "user_id"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			http.Error(w, "Missing or invalid Authorization header", http.StatusUnauthorized)
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(w, r)
 			return
 		}
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		tokenString := ""
+		authHeader := r.Header.Get("Authorization")
+		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			helpers.Information("[AUTH] Found token in Authorization header")
+		} else {
+			tokenString = r.URL.Query().Get("token")
+			if tokenString != "" {
+				helpers.Information("[AUTH] Found token in Query String")
+			} else {
+				// If not in query, check cookie
+				if cookie, err := r.Cookie("workspace_token"); err == nil {
+					tokenString = cookie.Value
+					helpers.Information("[AUTH] Found token in Cookie")
+				}
+			}
+		}
+
+		if tokenString == "" {
+			helpers.Warning("[AUTH] No token found in header, query, or cookie")
+			http.Error(w, "Missing or invalid Authorization", http.StatusUnauthorized)
+			return
+		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, http.ErrAbortHandler
+				helpers.Warning("[AUTH] Unexpected signing method: %v", token.Header["alg"])
+				return nil, jwt.ErrSignatureInvalid
 			}
 			return []byte(env.JwtSecret()), nil
 		})
-		if err != nil || !token.Valid {
+
+		if err != nil {
+			helpers.Warning("[AUTH] JWT Parse Error: %v", err)
+			http.Error(w, "Invalid token: "+err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if token == nil || !token.Valid {
+			helpers.Warning("[AUTH] Token is nil or invalid")
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return
+		}
+
+		helpers.Success("[AUTH] Token valid for workspace access")
+
+		// If the token was found in the query string, persist it in a cookie for future requests
+		// (needed for JS/CSS/WebSocket assets inside the iframe that won't have the query string)
+		if qToken := r.URL.Query().Get("token"); qToken != "" {
+			helpers.Information("[AUTH] Setting workspace_token cookie")
+			http.SetCookie(w, &http.Cookie{
+				Name:     "workspace_token",
+				Value:    qToken,
+				Path:     "/",
+				HttpOnly: true,
+				// Secure: true requires HTTPS. For local dev/tunnels, we'll keep it flexible
+				Secure:   r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https",
+				SameSite: http.SameSiteLaxMode,
+				Expires:  time.Now().Add(24 * time.Hour),
+			})
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {

@@ -1,79 +1,125 @@
-# Database Entity-Relationship Diagram (ERD)
+# Database ERD
 
-This diagram outlines the complete SQLite/PostgreSQL schema architecture utilized by the GDSC CTF Backend, illustrating both the core hacking mechanics and the LMS structural relationships.
+This diagram reflects the current GORM-managed schema used by the backend.
+`Container` and `Settings` exist as models in code, but they are not part of the current auto-migration set.
 
 ```mermaid
 erDiagram
-    User ||--o{ Challanges : "creates (Author)"
-    User ||--o{ Solves : "submits"
-    Challanges ||--o{ Solves : "has"
-    User ||--o{ QuestionSolve : "answers"
-    
-    Module ||--o{ Lesson : "contains"
-    Lesson ||--o{ Question : "contains"
-    Question ||--o{ QuestionSolve : "has"
+    users ||--o{ notes : owns
+    users ||--o{ challanges : authors
+    users ||--o{ solves : submits
+    challanges ||--o{ solves : receives
+    users ||--o| workspaces : allocates
 
-    User {
-        uint ID PK
-        string Name
-        string Email
-        string Username
-        string Password
-        bool IsAdmin
+    modules ||--o{ lessons : contains
+    lessons ||--o{ video_segments : contains
+    lessons ||--o{ questions : contains
+    video_segments ||--o{ questions : anchors
+    users ||--o{ question_solves : attempts
+    questions ||--o{ question_solves : records
+
+    users {
+        uint id PK
+        string name
+        string email
+        string username
+        string password
+        bool is_admin
     }
 
-    Challanges {
-        uint ID PK
-        string Title
-        string Description
-        string Difficulty
-        string Type
-        int Points
-        string Flag
-        uint AuthorID FK
-        bool Docker
-        bool Hidden
-        int Solves
+    notes {
+        uint id PK
+        uint user_id FK
+        string href
+        string content
+        datetime created_at
+        datetime updated_at
     }
 
-    Solves {
-        uint ID PK
-        uint ChallengeID FK
-        uint UserID FK
-        string Flag
-        bool Correct
+    challanges {
+        uint id PK
+        string title
+        string description
+        string difficulty
+        string type
+        int points
+        string flag
+        string created_at
+        string updated_at
+        uint author_id FK
+        bool docker
+        string docker_image
+        int solves
+        bool hidden
     }
 
-    Module {
-        uint ID PK
-        string Title
-        string Description
-        int Order
+    solves {
+        uint id PK
+        uint challenge_id FK
+        uint user_id FK
+        string flag
+        bool correct
     }
 
-    Lesson {
-        uint ID PK
-        uint ModuleID FK
-        string Title
-        string Content
-        int Order
+    workspaces {
+        uint id PK
+        uint user_id FK
+        string container_id
+        string status
+        string target_url
+        datetime created_at
+        datetime expires_at
     }
 
-    Question {
-        uint ID PK
-        uint LessonID FK
-        string Content
-        string Type
-        string Options
-        string CorrectAnswer
-        int Points
+    modules {
+        uint id PK
+        string title
+        string description
+        int order
     }
 
-    QuestionSolve {
-        uint ID PK
-        uint QuestionID FK
-        uint UserID FK
-        string SubmittedAnswer
-        bool Correct
+    lessons {
+        uint id PK
+        uint module_id FK
+        string title
+        string content
+        string body
+        string video_iframe
+        int order
+    }
+
+    video_segments {
+        uint id PK
+        uint lesson_id FK
+        string title
+        string description
+        int start_seconds
+        int end_seconds
+        int order
+    }
+
+    questions {
+        uint id PK
+        uint lesson_id FK
+        uint video_segment_id FK
+        string placement
+        string content
+        string prompt
+        string type
+        string options
+        string correct_answer
+        string answer_key
+        int points
+        int order
+    }
+
+    question_solves {
+        uint id PK
+        uint question_id FK
+        uint user_id FK
+        string submitted_answer
+        string normalized_answer
+        int attempt_no
+        bool correct
     }
 ```

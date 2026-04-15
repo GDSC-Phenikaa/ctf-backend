@@ -37,3 +37,7 @@ func SecretFlag() string {
 func ProblemRoot() string {
 	return os.Getenv("PROBLEM_ROOT")
 }
+
+func AllowedOrigin() string {
+	return os.Getenv("ALLOWED_ORIGIN")
+}

@@ -175,6 +175,7 @@ func UserRoutes(database *gorm.DB) chi.Router {
 	r.Post("/login", LoginHandler(database))
 	r.Get("/profile", ProfileHandler(database))
 	r.Post("/register", RegisterHandler(database))
+	r.Mount("/notes", NotesRoutes(database))
 	r.Options("/*", helpers.CORSOptionsHandler)
 	return r
 }
